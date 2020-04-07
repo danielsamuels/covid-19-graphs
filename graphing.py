@@ -7,6 +7,7 @@ from collections import ChainMap
 from datetime import datetime
 from operator import itemgetter
 from pathlib import Path
+from typing import Tuple, List
 
 import plotly.graph_objects as go
 
@@ -45,7 +46,7 @@ class Generator:
 
         raise Exception(f'Unable to process row, available keys: {row.keys()}')
 
-    def process_file(self, filename):
+    def process_file(self, filename) -> Tuple[datetime, int, int]:
         date = datetime.strptime(filename.name.rstrip('.csv'), '%m-%d-%Y')
         confirmed = deaths = 0
 
@@ -60,7 +61,7 @@ class Generator:
 
         return date, confirmed, deaths
 
-    def get_data(self):
+    def get_data(self) -> List[Tuple[datetime, int, int]]:
         # Pull the data from each CSV file.
         directory = Path('.') / 'COVID-19' / 'csse_covid_19_data' / 'csse_covid_19_daily_reports'
         files = directory.glob('*.csv')
@@ -90,10 +91,10 @@ class Generator:
 
         self.write_graph('deltas', deltas)
 
-    def generate_filename(self, graph_type: str):
+    def generate_filename(self, graph_type: str) -> str:
         return f"{self.active_country}-{graph_type}-{f'shifted-{self.config.shift}-days' if self.config.shift else 'unshifted'}{f' (log)' if self.config.log else ''}.png"
 
-    def generate_title(self, graph_type: str):
+    def generate_title(self, graph_type: str) -> str:
         if self.config.shift:
             return f'{graph_type.title()} in confirmed and deaths, with the deaths shifted by {self.config.shift} days'
 
@@ -101,8 +102,8 @@ class Generator:
 
     def write_graph(
         self,
-        graph_type,
-        time_series
+        graph_type: str,
+        time_series: list
     ):
         time_shift = self.config.shift
 
